@@ -1,0 +1,10 @@
+.DS_Store
+.build/
+dist/
+*.pcap
+*.pcapng
+*.jsonl
+state.json
+state.lock
+hotkeys.json
+daemon.lock

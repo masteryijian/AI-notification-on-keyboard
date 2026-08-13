@@ -1,0 +1,28 @@
+{
+  "description": "Optionaler schneller Lebenszyklus-Adapter für Pixiu Agent LED.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/Applications/Pixiu Agent LED.app/Contents/MacOS/pixiu-led\" hook",
+            "timeout": 2
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/Applications/Pixiu Agent LED.app/Contents/MacOS/pixiu-led\" hook",
+            "timeout": 2
+          }
+        ]
+      }
+    ]
+  }
+}
+
