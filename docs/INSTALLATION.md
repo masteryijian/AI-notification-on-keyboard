@@ -58,7 +58,7 @@ IOHIDManagerOpen failed: 0xE00002E2
 Expected hotkey result:
 
 ```text
-Registered keys: 1,2,3,4,5,6,7,8,9
+Registered keys: 1,2,3,4,5,6,7,8,9,0
 Conflicts: none
 ```
 

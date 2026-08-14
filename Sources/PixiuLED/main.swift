@@ -150,7 +150,8 @@ func makeReport(command: UInt8, rgb: (UInt8, UInt8, UInt8)? = nil) -> [UInt8] {
 func makeColorTableReports(_ colors: [Int: LEDColor]) -> [[UInt8]] {
     var table = [UInt8](repeating: 0xFF, count: PixiuProtocol.colorTableLength)
     for (key, color) in colors {
-        let offset = (PixiuProtocol.numberRowFirstSlot + key - 1) * 3
+        guard let keyIndex = agentTaskKeys.firstIndex(of: key) else { continue }
+        let offset = (PixiuProtocol.numberRowFirstSlot + keyIndex) * 3
         let rgb = color.rgb
         table[offset] = rgb.0
         table[offset + 1] = rgb.1
@@ -212,12 +213,12 @@ func printUsage() {
       pixiu-led list
       pixiu-led probe
       pixiu-led key1 <off|red|orange|green> [--apply]
-      pixiu-led set <1-9> <off|red|orange|green> [...] [--apply]
+      pixiu-led set <0-9> <off|red|orange|green> [...] [--apply]
       pixiu-led hook                 # reads Codex hook JSON from stdin
       pixiu-led daemon
       pixiu-led desktop-sync          # import active Codex Desktop tasks once
       pixiu-led desktop-watch <secs>  # diagnostic monitor without keyboard output
-      pixiu-led open-task <1-9>       # open the task assigned to a number key
+      pixiu-led open-task <0-9>       # open the task assigned to a number key
       pixiu-led hotkeys               # show registered shortcut conflicts
       pixiu-led daemon-status         # show the last keyboard update from the monitor
       pixiu-led status
@@ -284,7 +285,7 @@ do {
     }
 
     if command == "open-task", arguments.count == 2,
-       let key = Int(arguments[1]), (1...9).contains(key) {
+       let key = Int(arguments[1]), agentTaskKeys.contains(key) {
         try openTaskForKey(key)
         print("Opened the Codex task assigned to key \(key).")
         exit(0)
@@ -363,7 +364,7 @@ do {
         var index = values.startIndex
         while index < values.endIndex {
             let colorIndex = values.index(after: index)
-            guard let key = Int(values[index]), (1...9).contains(key),
+            guard let key = Int(values[index]), agentTaskKeys.contains(key),
                   let color = LEDColor(rawValue: values[colorIndex]) else {
                 printUsage()
                 exit(2)

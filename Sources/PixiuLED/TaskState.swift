@@ -1,6 +1,13 @@
 import Darwin
 import Foundation
 
+/// Physical number-row order: zero follows nine and wraps back to one.
+let agentTaskKeys = Array(1...9) + [0]
+
+func agentTaskKeyOrder(_ key: Int) -> Int {
+    agentTaskKeys.firstIndex(of: key) ?? agentTaskKeys.count
+}
+
 enum AgentTaskStatus: String, Codable {
     case running
     case done
@@ -197,12 +204,13 @@ func updateTask(
     }
 }
 
-/// Advances around 1...9, skipping every key whose task is still running.
+/// Advances around 1...9,0, skipping every key whose task is still running.
 /// A free key or the first completed/error key in cyclic order is reusable.
 func nextAssignableKey(in state: inout AgentTaskState) -> Int? {
-    let normalizedLastKey = (0...9).contains(state.lastAssignedKey) ? state.lastAssignedKey : 0
-    for offset in 0..<9 {
-        let candidate = ((normalizedLastKey + offset) % 9) + 1
+    let normalizedLastKey = agentTaskKeys.contains(state.lastAssignedKey) ? state.lastAssignedKey : 0
+    let lastIndex = agentTaskKeys.firstIndex(of: normalizedLastKey) ?? (agentTaskKeys.count - 1)
+    for offset in 1...agentTaskKeys.count {
+        let candidate = agentTaskKeys[(lastIndex + offset) % agentTaskKeys.count]
         if let occupied = state.tasks.first(where: { $0.value.key == candidate }) {
             guard occupied.value.status != .running else { continue }
             state.tasks.removeValue(forKey: occupied.key)
@@ -245,7 +253,7 @@ func printTaskStatus() throws {
         print("No assigned agent tasks.")
         return
     }
-    for task in state.tasks.values.sorted(by: { $0.key < $1.key }) {
+    for task in state.tasks.values.sorted(by: { agentTaskKeyOrder($0.key) < agentTaskKeyOrder($1.key) }) {
         let folder = task.cwd.isEmpty ? "-" : URL(fileURLWithPath: task.cwd).lastPathComponent
         print("\(task.key): \(task.status.rawValue)  \(folder)  session=\(task.sessionID)")
     }
@@ -285,7 +293,9 @@ func runDaemon() -> Never {
             do {
                 try desktopMonitor.poll()
                 let colors = try taskColors()
-                let signature = colors.keys.sorted().map { "\($0):\(colors[$0]!.rawValue)" }.joined(separator: ",")
+                let signature = colors.keys.sorted(by: { agentTaskKeyOrder($0) < agentTaskKeyOrder($1) })
+                    .map { "\($0):\(colors[$0]!.rawValue)" }
+                    .joined(separator: ",")
                 observedSignature = signature
                 if signature != lastSignature {
                     writeDaemonStatus(phase: "sending", signature: signature)

@@ -46,7 +46,7 @@ the same state through the same `session_id`, making the operation idempotent.
 Persistent state is stored in a small, file-locked JSON document. Assignment:
 
 1. continues cyclically after the last assigned number;
-2. returns to `1` after `9`;
+2. assigns `0` after `9`, then returns to `1`;
 3. skips every assignment that is still running;
 4. uses the first free, completed, or failed assignment; and
 5. never displaces a currently running task.
@@ -60,7 +60,8 @@ software-driven blinking.
 
 ### `HotKeyNavigator`
 
-The app registers `Control+Command+1…9` as global macOS hotkeys. The system
+The app registers `Control+Command+1…9` and `Control+Command+0` as global macOS
+hotkeys. The system
 returns an error when a shortcut is already assigned; the program does not
 override shortcuts owned by other applications. A successful input opens
 `codex://threads/<session-id>`.

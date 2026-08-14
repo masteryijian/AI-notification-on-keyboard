@@ -13,8 +13,8 @@ final class ProtocolTests: XCTestCase {
         )
     }
 
-    func testNumberRowColorsLandInSlotsElevenThroughNineteen() {
-        let reports = makeColorTableReports([1: .green, 9: .red])
+    func testNumberRowColorsLandInSlotsElevenThroughTwenty() {
+        let reports = makeColorTableReports([1: .green, 9: .red, 0: .orange])
         XCTAssertEqual(reports.count, 9)
 
         let table = reports.dropFirst().dropLast().flatMap { report in
@@ -23,6 +23,7 @@ final class ProtocolTests: XCTestCase {
         XCTAssertEqual(table.count, 378)
         XCTAssertEqual(Array(table[33...35]), [0x00, 0x54, 0x1C])
         XCTAssertEqual(Array(table[57...59]), [0xFF, 0x00, 0x00])
+        XCTAssertEqual(Array(table[60...62]), [0xFF, 0x60, 0x00])
     }
 
     func testOffUsesCapturedCherrySentinel() {
@@ -39,13 +40,20 @@ final class ProtocolTests: XCTestCase {
         XCTAssertTrue(reports.dropFirst().dropLast().allSatisfy { $0[3] == 0x0B })
     }
 
-    func testAllocationWrapsAfterNineAndSkipsRunningKeys() {
+    func testAllocationAssignsZeroAfterNine() {
+        var state = AgentTaskState(lastAssignedKey: 9)
+
+        XCTAssertEqual(nextAssignableKey(in: &state), 0)
+        XCTAssertEqual(state.lastAssignedKey, 0)
+    }
+
+    func testAllocationWrapsAfterZeroAndSkipsRunningKeys() {
         var state = AgentTaskState(
             tasks: [
                 "busy-1": task("busy-1", key: 1, status: .running),
                 "done-2": task("done-2", key: 2, status: .done),
             ],
-            lastAssignedKey: 9
+            lastAssignedKey: 0
         )
 
         XCTAssertEqual(nextAssignableKey(in: &state), 2)
@@ -54,14 +62,14 @@ final class ProtocolTests: XCTestCase {
         XCTAssertEqual(state.lastAssignedKey, 2)
     }
 
-    func testAllocationNeverReplacesNineRunningTasks() {
-        let tasks = Dictionary(uniqueKeysWithValues: (1...9).map { key in
+    func testAllocationNeverReplacesTenRunningTasks() {
+        let tasks = Dictionary(uniqueKeysWithValues: agentTaskKeys.map { key in
             ("busy-\(key)", task("busy-\(key)", key: key, status: .running))
         })
-        var state = AgentTaskState(tasks: tasks, lastAssignedKey: 9)
+        var state = AgentTaskState(tasks: tasks, lastAssignedKey: 0)
 
         XCTAssertNil(nextAssignableKey(in: &state))
-        XCTAssertEqual(state.tasks.count, 9)
-        XCTAssertEqual(state.lastAssignedKey, 9)
+        XCTAssertEqual(state.tasks.count, 10)
+        XCTAssertEqual(state.lastAssignedKey, 0)
     }
 }

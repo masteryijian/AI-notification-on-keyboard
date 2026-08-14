@@ -88,7 +88,7 @@ final class DesktopActivityMonitor {
         }
 
         // At app launch, import only genuinely active work. Historical completed
-        // turns must not occupy keys 1-9 merely because their files are recent.
+        // turns must not occupy keys 1-9,0 merely because their files are recent.
         for event in latestBySession.values {
             // Completed historical sessions update an already assigned slot but
             // never allocate a new one; active sessions are imported immediately.

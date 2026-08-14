@@ -53,8 +53,9 @@ seven payload blocks and then committed.
 
 - Key `1`: table slot 11, offsets 33–35
 - Keys `1` through `9`: slots 11–19
+- Key `0`: slot 20, offsets 60–62
 - The keymap read from the device associates these slots with HID usages `1E`
-  through `26`, making their mapping to the number row unambiguous.
+  through `27`, making their mapping to the number row unambiguous.
 
 The prototype therefore generates this sequence for each update:
 

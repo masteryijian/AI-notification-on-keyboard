@@ -5,7 +5,8 @@ USB hardware, they were essential for ruling out incorrect assumptions.
 
 ## 1. Initial idea
 
-The number row from `1` through `9` was intended to serve as a physical task dashboard:
+The number row was intended to serve as a physical task dashboard. The first
+version used `1` through `9`; the final order extends it with `0` after `9`:
 
 - running or waiting: initially blinking red, later deliberately changed to orange;
 - completed: green;
@@ -84,12 +85,12 @@ When an app is replaced or signed differently, macOS may treat its TCC mapping
 as a new application. A stable bundle ID and, ideally, the same development
 signature prevent repeated permission prompts.
 
-## 5. From one LED to nine task slots
+## 5. From one LED to ten task slots
 
 Individual reports were useful for verification but unsuitable for multiple
 tasks. The complete 378-byte table (`0B`) proved to be the correct abstraction.
-Slots 11–19 correspond to the number row, allowing each update to set all nine
-task colors consistently.
+Slots 11–20 correspond to `1` through `9`, then `0`, allowing each update to set
+all ten task colors consistently.
 
 ## 6. First lifecycle implementation: hooks only
 
@@ -133,14 +134,14 @@ through the same session ID.
 
 ## 9. Global navigation without interfering with existing shortcuts
 
-Using `1` through `9` alone was not an option because it would break normal
+Using the number row alone was not an option because it would break normal
 typing. `⌘1…9` is used for tabs in many applications. The first choice was
 therefore `⌃⌥⌘1…9`, but practical testing showed it was unnecessarily awkward.
-The final assignment, `⌃⌘1…9`, uses only two modifiers while remaining distinct
-from `⌘1…9` and `⌃1…9`.
+The final assignment, `⌃⌘1…9` plus `⌃⌘0`, uses only two modifiers while
+remaining distinct from ordinary number input and `⌘1…9`.
 
 macOS registers these combinations as true global hotkeys. If a combination is
-already assigned, registration fails instead of overriding its owner. All nine
+already assigned, registration fails instead of overriding its owner. All ten
 combinations were conflict-free during testing. Successful registration alone,
 however, proved insufficient: the first background build kept only a Foundation
 run loop alive. Carbon accepted the hotkeys but did not deliver their events to
@@ -168,9 +169,9 @@ The robust chain now consists of:
 1. the desktop JSONL monitor as the primary source;
 2. hooks as an optional, faster supplement;
 3. persistent, locked task state with deduplication;
-4. nine RGB slots controlled through the complete color table;
+4. ten RGB slots controlled through the complete color table in `1…9,0` order;
 5. solid orange for running or waiting, green for success, and red only for errors;
-6. `⌃⌘1…9` for jumping directly back to a task; and
+6. `⌃⌘1…9` plus `⌃⌘0` for jumping directly back to a task; and
 7. a signed background app bundle plus a LaunchAgent for startup at login.
 
 The largest remaining technical debt is the dependency on observed Codex file

@@ -15,6 +15,7 @@ private let numberKeyCodes: [Int: UInt32] = [
     7: UInt32(kVK_ANSI_7),
     8: UInt32(kVK_ANSI_8),
     9: UInt32(kVK_ANSI_9),
+    0: UInt32(kVK_ANSI_0),
 ]
 
 private struct HotKeyRegistrationState: Codable {
@@ -53,7 +54,7 @@ private let pixiuHotKeyHandler: EventHandlerUPP = { _, event, userData in
     return noErr
 }
 
-/// Registers ⌃⌘1 … ⌃⌘9 without intercepting ordinary number-key input.
+/// Registers ⌃⌘1 … ⌃⌘9 and ⌃⌘0 without intercepting ordinary number-key input.
 /// Carbon hot-key registration fails instead of overriding an existing owner.
 final class HotKeyNavigator {
     private var hotKeys: [EventHotKeyRef] = []
@@ -86,14 +87,14 @@ final class HotKeyNavigator {
             )
             guard status == noErr else {
                 fputs("pixiu-led hotkeys: event handler failed (\(status))\n", stderr)
-                writeHotKeyStatus(registered: [], failures: [0: status])
-                return [0: status]
+                writeHotKeyStatus(registered: [], failures: [-1: status])
+                return [-1: status]
             }
         }
 
         var failures: [Int: OSStatus] = [:]
         var registered: [Int] = []
-        for key in 1...9 {
+        for key in agentTaskKeys {
             guard let keyCode = numberKeyCodes[key] else { continue }
             var reference: EventHotKeyRef?
             let identifier = EventHotKeyID(signature: pixiuHotKeySignature, id: UInt32(key))
@@ -159,8 +160,8 @@ final class HotKeyNavigator {
 private func writeHotKeyStatus(registered: [Int], failures: [Int: OSStatus]) {
     do {
         let state = HotKeyRegistrationState(
-            shortcut: "Control+Command+1…9",
-            registeredKeys: registered.sorted(),
+            shortcut: "Control+Command+1…9,0",
+            registeredKeys: registered.sorted(by: { agentTaskKeyOrder($0) < agentTaskKeyOrder($1) }),
             failures: Dictionary(uniqueKeysWithValues: failures.map { (String($0.key), Int32($0.value)) }),
             updatedAt: Date().timeIntervalSince1970,
             lastTriggeredKey: nil,

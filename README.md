@@ -1,7 +1,8 @@
 # AI Notifications on Your Keyboard
 
 An experimental macOS background service that visualizes running Codex tasks on
-the RGB-enabled number keys `1` through `9` of a **CHERRY PIXIU 75** and opens
+the RGB-enabled number keys `1` through `9`, followed by `0`, on a
+**CHERRY PIXIU 75** and opens
 the associated task directly through a global keyboard shortcut.
 
 The project addresses an attention problem: instead of constantly watching
@@ -20,10 +21,10 @@ their progress.
 | Reliably detected error | Solid red |
 | No assigned task | LED off |
 
-- Assignment cycles through `1` to `9` and skips slots with running tasks.
+- Assignment cycles through `1` to `9`, then `0`, and skips slots with running tasks.
 - Multiple concurrent desktop tasks are shown separately.
 - Resumed tasks and tasks already running when the program starts are detected.
-- `⌃⌘1` through `⌃⌘9` open the associated Codex task.
+- `⌃⌘1` through `⌃⌘9`, plus `⌃⌘0`, open the associated Codex task.
 - Normal number entry and common shortcuts such as `⌘1` through `⌘9` remain unchanged.
 - Everything runs locally; the service has no network functionality of its own.
 
@@ -35,7 +36,7 @@ Codex Desktop / CLI                       optional Codex hooks
              │                                     │
              └────────────────┬────────────────────┘
                               ▼
-                    session state + keys 1–9
+                  session state + keys 1–9,0
                               │
                     ┌─────────┴─────────┐
                     ▼                   ▼
@@ -102,7 +103,7 @@ Without `--apply`, test colors are validated but **not** sent to the keyboard.
   may require changes.
 - A Codex adapter currently exists. Other agents can be added when they provide
   reliable start, completion, and error events.
-- No more than nine tasks can be represented at once. If every slot is occupied,
+- No more than ten tasks can be represented at once. If every slot is occupied,
   no running task is displaced; the oldest completed assignment is reused only
   when another slot is needed.
 - A red light is intentionally used only for an unambiguous error event. A run
