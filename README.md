@@ -4,6 +4,10 @@ Ein experimenteller macOS-Hintergrunddienst, der laufende Codex-Aufgaben auf den
 RGB-Tasten `1` bis `9` einer **CHERRY PIXIU 75** sichtbar macht und per globalem
 Kurzbefehl direkt zur zugehörigen Aufgabe springt.
 
+Das Projekt löst ein Aufmerksamkeitsproblem: Statt laufende KI-Agenten ständig
+auf dem Bildschirm zu beobachten, genügt ein kurzer Blick auf die Tastatur, um
+ihren Fortschritt passiv wahrzunehmen.
+
 > Stand des Prototyps: getestet am 13. August 2026 mit macOS, einer kabelgebundenen
 > CHERRY PIXIU 75 (`VID 046A`, `PID 01E2`) und Codex Desktop 26.803.61601.
 
@@ -118,4 +122,3 @@ gesendet. `probe` öffnet und schließt lediglich die erkannte HID-Schnittstelle
 Dies ist ein hardwaregebundener Forschungsprototyp und kein offizielles Produkt
 von OpenAI oder CHERRY. Für dieses Repository wurde noch keine Lizenz festgelegt;
 bis dahin gelten die gesetzlichen Standardrechte des Urhebers.
-
