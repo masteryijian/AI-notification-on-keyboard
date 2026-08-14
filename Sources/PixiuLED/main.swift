@@ -244,9 +244,7 @@ do {
             runDaemon()
         }
         withExtendedLifetime((hotKeyNavigator, instanceLock)) {
-            while true {
-                RunLoop.current.run(until: Date(timeIntervalSinceNow: 3600))
-            }
+            application.run()
         }
     }
     guard let command = arguments.first else {

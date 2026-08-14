@@ -18,10 +18,14 @@ private let numberKeyCodes: [Int: UInt32] = [
 ]
 
 private struct HotKeyRegistrationState: Codable {
-    let shortcut: String
-    let registeredKeys: [Int]
-    let failures: [String: Int32]
-    let updatedAt: TimeInterval
+    var shortcut: String
+    var registeredKeys: [Int]
+    var failures: [String: Int32]
+    var updatedAt: TimeInterval
+    var lastTriggeredKey: Int?
+    var lastTriggeredAt: TimeInterval?
+    var lastSessionID: String?
+    var lastOutcome: String?
 }
 
 private var hotKeyStatusURL: URL {
@@ -114,21 +118,38 @@ final class HotKeyNavigator {
     }
 
     func openTask(key: Int) {
+        updateHotKeyTrigger(key: key, sessionID: nil, outcome: "received")
         do {
             guard let task = try TaskStore.read().tasks.values.first(where: { $0.key == key }) else {
+                updateHotKeyTrigger(key: key, sessionID: nil, outcome: "no-task-assigned")
                 NSSound.beep()
                 return
             }
             guard let url = URL(string: "codex://threads/\(task.sessionID)") else {
+                updateHotKeyTrigger(key: key, sessionID: task.sessionID, outcome: "invalid-url")
                 NSSound.beep()
                 return
             }
             DispatchQueue.main.async {
-                if !NSWorkspace.shared.open(url) {
+                let opened = NSWorkspace.shared.open(url)
+                updateHotKeyTrigger(
+                    key: key,
+                    sessionID: task.sessionID,
+                    outcome: opened ? "opened" : "open-failed"
+                )
+                if opened {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        NSRunningApplication
+                            .runningApplications(withBundleIdentifier: "com.openai.codex")
+                            .first?
+                            .activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
+                    }
+                } else {
                     NSSound.beep()
                 }
             }
         } catch {
+            updateHotKeyTrigger(key: key, sessionID: nil, outcome: "state-read-failed")
             fputs("pixiu-led hotkeys: \(error.localizedDescription)\n", stderr)
             NSSound.beep()
         }
@@ -141,7 +162,11 @@ private func writeHotKeyStatus(registered: [Int], failures: [Int: OSStatus]) {
             shortcut: "Control+Command+1…9",
             registeredKeys: registered.sorted(),
             failures: Dictionary(uniqueKeysWithValues: failures.map { (String($0.key), Int32($0.value)) }),
-            updatedAt: Date().timeIntervalSince1970
+            updatedAt: Date().timeIntervalSince1970,
+            lastTriggeredKey: nil,
+            lastTriggeredAt: nil,
+            lastSessionID: nil,
+            lastOutcome: nil
         )
         try FileManager.default.createDirectory(
             at: hotKeyStatusURL.deletingLastPathComponent(),
@@ -155,6 +180,22 @@ private func writeHotKeyStatus(registered: [Int], failures: [Int: OSStatus]) {
     }
 }
 
+private func updateHotKeyTrigger(key: Int, sessionID: String?, outcome: String) {
+    do {
+        let data = try Data(contentsOf: hotKeyStatusURL)
+        var state = try JSONDecoder().decode(HotKeyRegistrationState.self, from: data)
+        state.lastTriggeredKey = key
+        state.lastTriggeredAt = Date().timeIntervalSince1970
+        state.lastSessionID = sessionID
+        state.lastOutcome = outcome
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        try encoder.encode(state).write(to: hotKeyStatusURL, options: .atomic)
+    } catch {
+        fputs("pixiu-led hotkeys: could not record trigger (\(error.localizedDescription))\n", stderr)
+    }
+}
+
 func printHotKeyStatus() throws {
     let data = try Data(contentsOf: hotKeyStatusURL)
     let state = try JSONDecoder().decode(HotKeyRegistrationState.self, from: data)
@@ -165,6 +206,17 @@ func printHotKeyStatus() throws {
     } else {
         let details = state.failures.keys.sorted().map { "\($0)=\(state.failures[$0]!)" }.joined(separator: ", ")
         print("Conflicts: \(details)")
+    }
+    if let key = state.lastTriggeredKey,
+       let timestamp = state.lastTriggeredAt,
+       let outcome = state.lastOutcome {
+        let date = Date(timeIntervalSince1970: timestamp).formatted(
+            .iso8601.year().month().day().time(includingFractionalSeconds: true)
+        )
+        let session = state.lastSessionID.map { " session=\($0)" } ?? ""
+        print("Last trigger: key=\(key) outcome=\(outcome) at=\(date)\(session)")
+    } else {
+        print("Last trigger: none since app launch")
     }
 }
 

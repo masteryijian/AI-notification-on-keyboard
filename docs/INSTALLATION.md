@@ -105,9 +105,12 @@ Tastatur per Kabel verbunden ist.
 
 ### LED funktioniert, aber der Hotkey springt nicht
 
-`hotkeys` ausführen. Bei einem Konflikt den fremden System-/App-Kurzbefehl ändern
-oder die Modifier in `HotKeyNavigator.swift` anpassen. Prüfen, ob die installierte
-Codex-Version das Schema `codex://threads/<ID>` noch unterstützt.
+`hotkeys` ausführen und danach den gewünschten Kurzbefehl einmal drücken. Die
+Zeile `Last trigger` unterscheidet drei Fälle: Kein Ereignis angekommen,
+Ereignis ohne zugewiesene Aufgabe oder Aufgabe erfolgreich geöffnet. Bei einem
+Konflikt den fremden System-/App-Kurzbefehl ändern oder die Modifier in
+`HotKeyNavigator.swift` anpassen. Prüfen, ob die installierte Codex-Version das
+Schema `codex://threads/<ID>` noch unterstützt.
 
 ### Nach einem Neubau ist die Berechtigung weg
 

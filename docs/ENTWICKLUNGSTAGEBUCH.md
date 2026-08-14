@@ -137,7 +137,13 @@ endgültige Belegung `⌃⌘1…9` benötigt nur zwei Modifier, bleibt aber getr
 
 macOS registriert diese Kombinationen als echte globale Hotkeys. Ist eine
 Kombination schon vergeben, schlägt die Registrierung fehl, statt den Besitzer
-zu überschreiben. Im Test waren alle neun Kombinationen konfliktfrei.
+zu überschreiben. Im Test waren alle neun Kombinationen konfliktfrei. Eine
+erfolgreiche Registrierung allein erwies sich jedoch als unzureichender Test:
+Die erste Hintergrundversion hielt nur eine Foundation-RunLoop am Leben. Dadurch
+nahm Carbon die Hotkeys an, lieferte ihre Ereignisse aber nicht an den Handler.
+Der Wechsel auf die vollständige `NSApplication.run()`-Ereignisschleife behob
+den Fehler. `hotkeys.json` protokolliert seitdem zusätzlich die letzte Auslösung
+und das Ergebnis des URL-Aufrufs.
 
 Die installierte Codex-App registrierte das URL-Schema `codex` und akzeptierte
 `codex://threads/<thread-id>`. Damit ist ein genauer Sprung möglich, ohne Maus,
