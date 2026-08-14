@@ -52,6 +52,7 @@ IOHIDManagerOpen failed: 0xE00002E2
 ```bash
 "$HOME/Applications/Pixiu Agent LED.app/Contents/MacOS/pixiu-led" status
 "$HOME/Applications/Pixiu Agent LED.app/Contents/MacOS/pixiu-led" hotkeys
+"$HOME/Applications/Pixiu Agent LED.app/Contents/MacOS/pixiu-led" daemon-status
 ```
 
 Erwartetes Hotkey-Ergebnis:
@@ -87,6 +88,7 @@ swift run pixiu-led set 1 green 2 orange 3 red --apply
 ```text
 ~/Library/Application Support/PixiuAgentLED/state.json
 ~/Library/Application Support/PixiuAgentLED/hotkeys.json
+~/Library/Application Support/PixiuAgentLED/daemon-status.json
 ~/Library/Application Support/PixiuAgentLED/daemon.log
 ~/Library/Application Support/PixiuAgentLED/daemon-error.log
 ```
@@ -100,8 +102,10 @@ Das ist beabsichtigt: `LSBackgroundOnly` ist aktiv. Status und Diagnose erfolgen
 
 ### Codex-Aufgabe wird erkannt, aber LED ändert sich nicht
 
-`probe` ausführen und Eingabeüberwachung prüfen. Außerdem sicherstellen, dass die
-Tastatur per Kabel verbunden ist.
+`daemon-status` ausführen. `phase=applied` bestätigt die zuletzt erfolgreich
+gesendete Farbtabelle; `phase=error` zeigt den konkreten HID-Fehler. Danach
+`probe` ausführen, Eingabeüberwachung prüfen und sicherstellen, dass die Tastatur
+per Kabel verbunden ist.
 
 ### LED funktioniert, aber der Hotkey springt nicht
 
@@ -114,5 +118,7 @@ Schema `codex://threads/<ID>` noch unterstützt.
 
 ### Nach einem Neubau ist die Berechtigung weg
 
-Bundle-ID und Signierungsidentität stabil halten. Ad-hoc-signierte Neubauten
-können von TCC als geänderte Anwendung behandelt werden.
+Bundle-ID `com.yijian.pixiu-agent-led`, Installationspfad und
+Signierungsidentität stabil halten. TCC bindet die Eingabeüberwachung an diese
+Anwendungsidentität, nicht nur an den sichtbaren Namen. Eine abweichende
+Bundle-ID oder ad-hoc-signierte Neubauten werden als andere Anwendung behandelt.

@@ -41,6 +41,48 @@ struct AgentTaskState: Codable {
     }
 }
 
+private struct DaemonRuntimeState: Codable {
+    let pid: Int32
+    let phase: String
+    let signature: String
+    let error: String?
+    let updatedAt: TimeInterval
+}
+
+private var daemonStatusURL: URL {
+    TaskStore.stateURL.deletingLastPathComponent().appendingPathComponent("daemon-status.json")
+}
+
+private func writeDaemonStatus(phase: String, signature: String, error: String? = nil) {
+    do {
+        let state = DaemonRuntimeState(
+            pid: ProcessInfo.processInfo.processIdentifier,
+            phase: phase,
+            signature: signature,
+            error: error,
+            updatedAt: Date().timeIntervalSince1970
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        try encoder.encode(state).write(to: daemonStatusURL, options: .atomic)
+    } catch {
+        fputs("pixiu-led daemon: could not write runtime status (\(error.localizedDescription))\n", stderr)
+    }
+}
+
+func printDaemonStatus() throws {
+    let data = try Data(contentsOf: daemonStatusURL)
+    let state = try JSONDecoder().decode(DaemonRuntimeState.self, from: data)
+    let date = Date(timeIntervalSince1970: state.updatedAt).formatted(
+        .iso8601.year().month().day().time(includingFractionalSeconds: true)
+    )
+    print("Daemon: pid=\(state.pid) phase=\(state.phase) at=\(date)")
+    print("Colors: \(state.signature.isEmpty ? "none" : state.signature)")
+    if let error = state.error {
+        print("Error: \(error)")
+    }
+}
+
 final class DaemonInstanceLock {
     private let fileDescriptor: Int32
 
@@ -236,6 +278,8 @@ func runDaemon() -> Never {
     let desktopMonitor = DesktopActivityMonitor()
     var lastSignature = ""
     var lastError = ""
+    var observedSignature = ""
+    writeDaemonStatus(phase: "started", signature: "")
     while true {
         autoreleasepool {
             do {
@@ -243,7 +287,9 @@ func runDaemon() -> Never {
                 let phase = Int(Date().timeIntervalSince1970 / 1.0).isMultiple(of: 2)
                 let colors = try taskColors(blinkOn: phase)
                 let signature = colors.keys.sorted().map { "\($0):\(colors[$0]!.rawValue)" }.joined(separator: ",")
+                observedSignature = signature
                 if signature != lastSignature {
+                    writeDaemonStatus(phase: "sending", signature: signature)
                     guard let candidate = try findCandidates().first(where: { $0.isRGBInterface }) else {
                         throw NSError(domain: "PixiuLED", code: 11, userInfo: [
                             NSLocalizedDescriptionKey: "PIXIU 75 RGB interface not found",
@@ -252,12 +298,18 @@ func runDaemon() -> Never {
                     try sendReports(makeColorTableReports(colors), to: candidate)
                     lastSignature = signature
                     lastError = ""
+                    writeDaemonStatus(phase: "applied", signature: signature)
                 }
             } catch {
                 if error.localizedDescription != lastError {
                     fputs("pixiu-led daemon: \(error.localizedDescription)\n", stderr)
                     lastError = error.localizedDescription
                 }
+                writeDaemonStatus(
+                    phase: "error",
+                    signature: observedSignature,
+                    error: error.localizedDescription
+                )
             }
         }
         Thread.sleep(forTimeInterval: 0.20)

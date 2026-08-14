@@ -9,7 +9,7 @@
     <key>CFBundleExecutable</key>
     <string>pixiu-led</string>
     <key>CFBundleIdentifier</key>
-    <string>io.github.masteryijian.pixiu-agent-led</string>
+    <string>com.yijian.pixiu-agent-led</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>

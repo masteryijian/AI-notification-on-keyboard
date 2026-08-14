@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP_PATH="$HOME/Applications/Pixiu Agent LED.app"
-LAUNCH_AGENT="$HOME/Library/LaunchAgents/io.github.masteryijian.pixiu-agent-led.plist"
+LAUNCH_AGENT="$HOME/Library/LaunchAgents/com.yijian.pixiu-agent-led.plist"
 SUPPORT_DIR="$HOME/Library/Application Support/PixiuAgentLED"
 
 mkdir -p "$HOME/Applications" "$HOME/Library/LaunchAgents" "$SUPPORT_DIR"
@@ -15,7 +15,7 @@ cat > "$LAUNCH_AGENT" <<PLIST
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>io.github.masteryijian.pixiu-agent-led</string>
+    <string>com.yijian.pixiu-agent-led</string>
     <key>ProgramArguments</key>
     <array>
         <string>/usr/bin/open</string>
@@ -33,7 +33,7 @@ cat > "$LAUNCH_AGENT" <<PLIST
 PLIST
 
 plutil -lint "$LAUNCH_AGENT"
-launchctl bootout "gui/$UID/io.github.masteryijian.pixiu-agent-led" 2>/dev/null || true
+launchctl bootout "gui/$UID/com.yijian.pixiu-agent-led" 2>/dev/null || true
 launchctl bootstrap "gui/$UID" "$LAUNCH_AGENT"
 
 echo "Installiert: $APP_PATH"

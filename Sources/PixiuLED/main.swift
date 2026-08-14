@@ -219,6 +219,7 @@ func printUsage() {
       pixiu-led desktop-watch <secs>  # diagnostic monitor without keyboard output
       pixiu-led open-task <1-9>       # open the task assigned to a number key
       pixiu-led hotkeys               # show registered shortcut conflicts
+      pixiu-led daemon-status         # show the last keyboard update from the monitor
       pixiu-led status
       pixiu-led clear
 
@@ -291,6 +292,11 @@ do {
 
     if command == "hotkeys" {
         try printHotKeyStatus()
+        exit(0)
+    }
+
+    if command == "daemon-status" {
+        try printDaemonStatus()
         exit(0)
     }
 

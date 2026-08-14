@@ -149,6 +149,16 @@ Die installierte Codex-App registrierte das URL-Schema `codex` und akzeptierte
 `codex://threads/<thread-id>`. Damit ist ein genauer Sprung möglich, ohne Maus,
 Fensterkoordinaten oder simulierte Suche.
 
+Ein späterer Neubau deckte einen zweiten macOS-spezifischen Fehler auf: Der lokal
+bereits autorisierte Prototyp verwendete `com.yijian.pixiu-agent-led`, während
+die veröffentlichte `Info.plist` und der Installer noch
+`io.github.masteryijian.pixiu-agent-led` enthielten. TCC behandelte den Neubau
+daher trotz gleichen Namens als andere Anwendung und verweigerte HID-Zugriff mit
+`0xE00002E2`. Bundle-ID, LaunchAgent-Label, Pfad und Development-Signatur sind
+nun stabil vereinheitlicht. `daemon-status.json` unterscheidet außerdem sichtbar
+zwischen erkannter Aufgabe, laufendem Sendeversuch, erfolgreicher Farbtabelle und
+HID-Fehler.
+
 ## 10. Erfolgreicher Endzustand
 
 Die robuste Kette besteht nun aus:
