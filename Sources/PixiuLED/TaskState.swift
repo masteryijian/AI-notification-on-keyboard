@@ -258,13 +258,13 @@ func clearTaskState() throws {
     }
 }
 
-func taskColors(blinkOn: Bool) throws -> [Int: LEDColor] {
+func taskColors() throws -> [Int: LEDColor] {
     let state = try TaskStore.read()
     return Dictionary(uniqueKeysWithValues: state.tasks.values.map { task in
         let color: LEDColor
         switch task.status {
         case .running:
-            color = blinkOn ? .orange : .off
+            color = .orange
         case .done:
             color = .green
         case .error:
@@ -284,8 +284,7 @@ func runDaemon() -> Never {
         autoreleasepool {
             do {
                 try desktopMonitor.poll()
-                let phase = Int(Date().timeIntervalSince1970 / 1.0).isMultiple(of: 2)
-                let colors = try taskColors(blinkOn: phase)
+                let colors = try taskColors()
                 let signature = colors.keys.sorted().map { "\($0):\(colors[$0]!.rawValue)" }.joined(separator: ",")
                 observedSignature = signature
                 if signature != lastSignature {

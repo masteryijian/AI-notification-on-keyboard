@@ -54,8 +54,9 @@ Persistent state is stored in a small, file-locked JSON document. Assignment:
 ### HID output
 
 The daemon calculates a 378-byte color table from the current state and sends it
-only when its signature or blinking phase changes. A running task alternates
-between orange and off once per second.
+only when its signature changes. Running tasks remain solid orange, so USB writes
+occur only on real status transitions and normal typing is not interrupted by
+software-driven blinking.
 
 ### `HotKeyNavigator`
 

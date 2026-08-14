@@ -15,6 +15,12 @@ The number row from `1` through `9` was intended to serve as a physical task das
 Red was removed from the normal running indicator because an alarm color would
 otherwise signal “error” continuously during every healthy run.
 
+The first orange implementation blinked in software once per second. Each
+transition sent nine HID reports with about 225 ms of total delay. In practical
+testing, this dropped keystrokes during fast typing. The safe final version uses
+solid orange and writes only on real task-state changes. Hardware blinking can
+be added later if a separate, non-blocking firmware command is identified.
+
 ## 2. First uncertainty: Is per-key RGB control possible from macOS?
 
 CHERRY Utility could configure the keyboard but offered no documented macOS
@@ -163,7 +169,7 @@ The robust chain now consists of:
 2. hooks as an optional, faster supplement;
 3. persistent, locked task state with deduplication;
 4. nine RGB slots controlled through the complete color table;
-5. blinking orange for running or waiting, green for success, and red only for errors;
+5. solid orange for running or waiting, green for success, and red only for errors;
 6. `⌃⌘1…9` for jumping directly back to a task; and
 7. a signed background app bundle plus a LaunchAgent for startup at login.
 

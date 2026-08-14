@@ -15,7 +15,7 @@ their progress.
 
 | State | Indicator |
 | --- | --- |
-| Task running or waiting | Slowly blinking orange |
+| Task running or waiting | Solid orange |
 | Task completed | Solid green |
 | Reliably detected error | Solid red |
 | No assigned task | LED off |
@@ -107,6 +107,9 @@ Without `--apply`, test colors are validated but **not** sent to the keyboard.
   when another slot is needed.
 - A red light is intentionally used only for an unambiguous error event. A run
   aborted or stopped by the user is considered finished, not failed.
+- The running indicator deliberately does not blink in software. Repeated full
+  RGB-table updates measurably blocked the keyboard firmware and caused dropped
+  keystrokes during fast typing.
 
 ## Documentation
 
