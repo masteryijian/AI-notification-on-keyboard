@@ -3,7 +3,7 @@ import Carbon.HIToolbox
 import Foundation
 
 private let pixiuHotKeySignature: OSType = 0x50584C44 // "PXLD"
-private let pixiuHotKeyModifiers = UInt32(cmdKey | optionKey | controlKey)
+private let pixiuHotKeyModifiers = UInt32(cmdKey | controlKey)
 
 private let numberKeyCodes: [Int: UInt32] = [
     1: UInt32(kVK_ANSI_1),
@@ -49,7 +49,7 @@ private let pixiuHotKeyHandler: EventHandlerUPP = { _, event, userData in
     return noErr
 }
 
-/// Registers ⌃⌥⌘1 … ⌃⌥⌘9 without intercepting ordinary number-key input.
+/// Registers ⌃⌘1 … ⌃⌘9 without intercepting ordinary number-key input.
 /// Carbon hot-key registration fails instead of overriding an existing owner.
 final class HotKeyNavigator {
     private var hotKeys: [EventHotKeyRef] = []
@@ -106,7 +106,7 @@ final class HotKeyNavigator {
                 registered.append(key)
             } else {
                 failures[key] = status
-                fputs("pixiu-led hotkeys: ⌃⌥⌘\(key) unavailable (\(status))\n", stderr)
+                fputs("pixiu-led hotkeys: ⌃⌘\(key) unavailable (\(status))\n", stderr)
             }
         }
         writeHotKeyStatus(registered: registered, failures: failures)
@@ -138,7 +138,7 @@ final class HotKeyNavigator {
 private func writeHotKeyStatus(registered: [Int], failures: [Int: OSStatus]) {
     do {
         let state = HotKeyRegistrationState(
-            shortcut: "Control+Option+Command+1…9",
+            shortcut: "Control+Command+1…9",
             registeredKeys: registered.sorted(),
             failures: Dictionary(uniqueKeysWithValues: failures.map { (String($0.key), Int32($0.value)) }),
             updatedAt: Date().timeIntervalSince1970

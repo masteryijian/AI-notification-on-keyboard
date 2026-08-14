@@ -23,7 +23,7 @@ ihren Fortschritt passiv wahrzunehmen.
 - Die Vergabe läuft zyklisch über `1` bis `9`; laufende Belegungen werden übersprungen.
 - Mehrere parallele Desktop-Aufgaben werden getrennt dargestellt.
 - Wieder aufgenommene und beim Programmstart bereits laufende Aufgaben werden erkannt.
-- `⌃⌥⌘1` bis `⌃⌥⌘9` öffnen die zugehörige Codex-Aufgabe.
+- `⌃⌘1` bis `⌃⌘9` öffnen die zugehörige Codex-Aufgabe.
 - Normale Zahleneingabe und übliche Kürzel wie `⌘1` bis `⌘9` bleiben unverändert.
 - Alles läuft lokal; der Dienst besitzt keine eigene Netzwerkkommunikation.
 
@@ -39,7 +39,7 @@ Codex Desktop / CLI                     optionale Codex-Hooks
                             │
                   ┌─────────┴─────────┐
                   ▼                   ▼
-          USB-HID-RGB-Berichte   ⌃⌥⌘ + Ziffer
+          USB-HID-RGB-Berichte   ⌃⌘ + Ziffer
           an die PIXIU 75        codex://threads/<ID>
 ```
 

@@ -60,7 +60,7 @@ wechselt im Sekundentakt zwischen Orange und „aus“.
 
 ### `HotKeyNavigator`
 
-Die App registriert `Control+Option+Command+1…9` als globale macOS-Hotkeys. Das
+Die App registriert `Control+Command+1…9` als globale macOS-Hotkeys. Das
 System gibt bei einer bestehenden Belegung einen Fehler zurück; das Programm
 überschreibt fremde Kurzbefehle nicht. Eine erfolgreiche Eingabe öffnet
 `codex://threads/<session-id>`.

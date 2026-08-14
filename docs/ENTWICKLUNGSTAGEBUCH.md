@@ -131,7 +131,9 @@ rekonstruiert beim Start aktive Sessions und führt Hook- und Desktop-Ereignisse
 
 Ein einzelner Druck auf `1` bis `9` kam nicht infrage, weil er normale Eingabe
 zerstören würde. `⌘1…9` ist in vielen Programmen für Tabs belegt. Gewählt wurde
-deshalb `⌃⌥⌘1…9`.
+deshalb zunächst `⌃⌥⌘1…9`. Im Praxistest war das unnötig umständlich. Die
+endgültige Belegung `⌃⌘1…9` benötigt nur zwei Modifier, bleibt aber getrennt von
+`⌘1…9` und `⌃1…9`.
 
 macOS registriert diese Kombinationen als echte globale Hotkeys. Ist eine
 Kombination schon vergeben, schlägt die Registrierung fehl, statt den Besitzer
@@ -150,10 +152,9 @@ Die robuste Kette besteht nun aus:
 3. persistenter, gesperrter Task-Zustand mit Deduplizierung;
 4. neun RGB-Slots über die komplette Farbtabelle;
 5. Orange blinkend für Arbeit/Warten, Grün für Erfolg, Rot nur für Fehler;
-6. `⌃⌥⌘1…9` für den direkten Rücksprung zur Aufgabe;
+6. `⌃⌘1…9` für den direkten Rücksprung zur Aufgabe;
 7. signiertem Hintergrund-App-Bundle plus LaunchAgent für den Login-Start.
 
 Die größte verbleibende technische Schuld ist die Abhängigkeit von beobachteten,
 nicht offiziell stabilisierten Codex-Datei- und URL-Formaten. Die Adaptergrenze
 ist deshalb bewusst klein gehalten.
-
