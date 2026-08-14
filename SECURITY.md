@@ -1,40 +1,37 @@
-# Datenschutz und Sicherheit
+# Privacy and Security
 
-## Lokales Datenmodell
+## Local data model
 
-Der Dienst hat keine eigene Netzwerkfunktion. Er liest lokale Codex-Rollout-
-Dateien unter `~/.codex/sessions`, extrahiert nur Sitzungs-ID, Arbeitsverzeichnis,
-Turn-ID, Zeitstempel und Lebenszyklusereignis und speichert den kompakten Zustand
-unter:
+The service has no network functionality of its own. It reads local Codex rollout
+files under `~/.codex/sessions`, extracts only the session ID, working directory,
+turn ID, timestamp, and lifecycle event, and stores compact state under:
 
 ```text
 ~/Library/Application Support/PixiuAgentLED/
 ```
 
-Beim Öffnen einer Aufgabe übergibt er lediglich die lokale URL
-`codex://threads/<Sitzungs-ID>` an macOS.
+When opening a task, it only passes the local URL
+`codex://threads/<session-ID>` to macOS.
 
-## Nicht veröffentlichen
+## Do not publish
 
-Folgende Dateien können vertrauliche Inhalte oder Geräteinformationen enthalten
-und sind deshalb in `.gitignore` ausgeschlossen:
+The following files may contain confidential content or device information and
+are therefore excluded by `.gitignore`:
 
-- USB-PCAP-/PCAPNG-Mitschnitte
-- Codex-Rollout-Dateien (`*.jsonl`)
-- `state.json`, `hotkeys.json` und Protokolldateien
-- persönliche Hook-Konfigurationen mit absoluten Benutzerpfaden
-- signierte lokale App-Bundles
+- USB PCAP or PCAPNG captures
+- Codex rollout files (`*.jsonl`)
+- `state.json`, `hotkeys.json`, and log files
+- Personal hook configurations containing absolute user paths
+- Signed local app bundles
 
-## HID-Risiko
+## HID risk
 
-Das Programm sendet herstellerspezifische USB-HID-Berichte. Die Validierung von
-VID, PID, Reportgröße und Report ID begrenzt das Ziel, ersetzt aber keine
-Firmwaregarantie. Neue Hardwarevarianten zuerst nur mit `list`, `probe` und
-Dry-Run-Befehlen untersuchen.
+The program sends vendor-specific USB HID reports. Validation of VID, PID, report
+size, and Report ID restricts the target but does not provide a firmware guarantee.
+Investigate new hardware variants first with `list`, `probe`, and dry-run commands.
 
-## Fehler melden
+## Reporting security issues
 
-Bitte Sicherheitsprobleme nicht zusammen mit privaten PCAP- oder Sitzungsdaten
-in ein öffentliches Issue kopieren. Ein minimaler, anonymisierter Hex-Ausschnitt
-und die Hardware-/Firmwareversion reichen meistens aus.
-
+Do not include private PCAP or session data in a public issue. A minimal,
+anonymized hexadecimal excerpt and the hardware and firmware versions are usually
+sufficient.

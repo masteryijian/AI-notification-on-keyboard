@@ -1,84 +1,80 @@
-# Technische Notizen zum RGB-Protokoll der PIXIU 75
+# Technical Notes on the PIXIU 75 RGB Protocol
 
-## Beobachtetes Gerät
+## Observed device
 
-| Merkmal | Wert |
+| Property | Value |
 | --- | --- |
-| USB Vendor ID | `046A` |
-| USB Product ID | `01E2` |
-| RGB OUT Endpoint im Windows-Mitschnitt | `0x05` |
-| Antwort-Endpunkt | `0x82` |
-| Transportgröße | 64 Byte |
-| verwendete HID Report ID unter macOS | `4` |
+| USB vendor ID | `046A` |
+| USB product ID | `01E2` |
+| RGB OUT endpoint in the Windows capture | `0x05` |
+| Response endpoint | `0x82` |
+| Transport size | 64 bytes |
+| HID Report ID used on macOS | `4` |
 
-Alle Werte stammen aus einer einzelnen kabelgebundenen CHERRY PIXIU 75. Andere
-Firmware- oder Hardwarevarianten müssen vor dem Senden separat geprüft werden.
+All values come from a single wired CHERRY PIXIU 75. Other firmware or hardware
+variants must be checked separately before sending data.
 
-## Wie der Mitschnitt entstand
+## How the capture was created
 
-CHERRY Utility lief in einer Windows-11-VM unter UTM. USBPcap zeichnete den
-USB-Verkehr auf, während nacheinander ausschließlich die Farbe der Taste `1`
-geändert wurde:
+CHERRY Utility ran in a Windows 11 VM under UTM. USBPcap recorded the USB traffic
+while only the color of key `1` was changed in sequence:
 
 ```text
-grün → aus → rot → grün → aus
+green → off → red → green → off
 ```
 
-Diese bewusst einfache Folge machte die drei veränderlichen RGB-Bytes sichtbar.
-Roh-PCAP-Dateien gehören wegen möglicher Geräte- und Nutzungsdaten nicht in dieses
-Repository.
+This deliberately simple sequence exposed the three variable RGB bytes. Raw PCAP
+files do not belong in this repository because they may contain device or usage data.
 
-## Einzelne ausgewählte Taste
+## One selected key
 
-Die beobachtete Transaktion bestand aus:
+The observed transaction consisted of:
 
-1. Beginn mit Command-Byte `01`
-2. Farbe der ausgewählten Taste mit Command-Byte `06`
-3. Übernahme mit Command-Byte `02`
+1. begin with command byte `01`;
+2. set the selected key's color with command byte `06`; and
+3. commit with command byte `02`.
 
-Im 64-Byte-Bericht für die Zahlentaste `1` lagen Rot, Grün und Blau an den
-Offsets 13, 14 und 15. Beobachtete Werte:
+In the 64-byte report for number key `1`, red, green, and blue were located at
+offsets 13, 14, and 15. Observed values:
 
-| Zustand | RGB-Bytes |
+| State | RGB bytes |
 | --- | --- |
-| deaktiviert / keine Farbe | `FF FF FF` |
-| rot | `FF 00 00` |
-| grün | `00 54 1C` |
-| im Prototyp verwendetes Orange | `FF 60 00` |
+| Disabled / no color | `FF FF FF` |
+| Red | `FF 00 00` |
+| Green | `00 54 1C` |
+| Orange used by the prototype | `FF 60 00` |
 
-`FF FF FF` ist hier der vom CHERRY Utility beobachtete „aus“-Sentinel und nicht
-weißes Licht.
+Here, `FF FF FF` is the “off” sentinel observed from CHERRY Utility, not white light.
 
-## Vollständige Farbtabelle
+## Complete color table
 
-Persistente Farbzuweisungen verwenden Command `0B`. Eine 378 Byte große Tabelle
-wird in sieben Nutzdatenblöcke aufgeteilt und anschließend übernommen.
+Persistent color assignments use command `0B`. A 378-byte table is divided into
+seven payload blocks and then committed.
 
-- Taste `1`: Tabellenslot 11, Offsets 33–35
-- Tasten `1` bis `9`: Slots 11–19
-- Die zurückgelesene Tastenbelegung weist diesen Slots die HID Usages `1E` bis
-  `26` zu; damit ist die Zuordnung zur Zahlenreihe eindeutig.
+- Key `1`: table slot 11, offsets 33–35
+- Keys `1` through `9`: slots 11–19
+- The keymap read from the device associates these slots with HID usages `1E`
+  through `26`, making their mapping to the number row unambiguous.
 
-Der Prototyp erzeugt deshalb pro Aktualisierung:
+The prototype therefore generates this sequence for each update:
 
 ```text
 01 (begin) → 7 × 0B (table chunks) → 02 (commit)
 ```
 
-## Auswahl der richtigen macOS-HID-Schnittstelle
+## Selecting the correct macOS HID interface
 
-Die Tastatur stellt mehrere HID-Schnittstellen bereit. Vendor- und Product-ID
-allein reichen daher nicht aus. Die erfolgreiche Auswahl verlangt gleichzeitig:
+The keyboard exposes several HID interfaces, so vendor and product IDs alone are
+not sufficient. A successful match requires both:
 
-- maximales Output-Report-Format von 64 Byte und
-- eine im HID Report Descriptor deklarierte Output Report ID `4`.
+- a maximum output report size of 64 bytes; and
+- Output Report ID `4` declared in the HID Report Descriptor.
 
-Eine andere Vendor-Usage-Page der Tastatur verwendet Report ID `5`; sie gehört
-nicht zu dem hier beobachteten RGB-Transport.
+Another vendor usage page on the keyboard uses Report ID `5`; it is not part of
+the RGB transport observed here.
 
-## Sicherheitsregel des Werkzeugs
+## Tool safety rule
 
-Diagnosebefehle sind standardmäßig Dry-Runs. Erst `--apply` sendet Daten. Vor
-jedem Schreibzugriff validiert das Programm VID, PID, Reportgröße und Report ID.
-Das reduziert das Risiko, Berichte an eine falsche HID-Schnittstelle zu senden.
-
+Diagnostic commands are dry runs by default. Data is sent only when `--apply` is
+provided. Before every write, the program validates the VID, PID, report size,
+and Report ID. This reduces the risk of sending reports to the wrong HID interface.

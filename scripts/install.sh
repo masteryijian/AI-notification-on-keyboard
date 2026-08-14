@@ -36,5 +36,5 @@ plutil -lint "$LAUNCH_AGENT"
 launchctl bootout "gui/$UID/com.yijian.pixiu-agent-led" 2>/dev/null || true
 launchctl bootstrap "gui/$UID" "$LAUNCH_AGENT"
 
-echo "Installiert: $APP_PATH"
-echo "Jetzt Eingabeüberwachung in den macOS-Systemeinstellungen erlauben."
+echo "Installed: $APP_PATH"
+echo "Now allow Input Monitoring in macOS System Settings."

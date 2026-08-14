@@ -1,53 +1,53 @@
-# Installation und Betrieb
+# Installation and Operation
 
-## 1. Projekt bauen
+## 1. Build the project
 
 ```bash
 swift build -c release
 swift test
 ```
 
-Nur die Kommandozeile testen:
+To test only the command-line tool:
 
 ```bash
 .build/release/pixiu-led list
 .build/release/pixiu-led probe
 ```
 
-`probe` sendet keinen Bericht.
+`probe` does not send a report.
 
-## 2. Hintergrund-App installieren
+## 2. Install the background app
 
 ```bash
 ./scripts/install.sh
 ```
 
-Das Skript:
+The script:
 
-1. baut die Release-Version;
-2. erzeugt `~/Applications/Pixiu Agent LED.app`;
-3. signiert sie standardmäßig ad hoc oder mit `SIGNING_IDENTITY`;
-4. installiert einen LaunchAgent für den automatischen Login-Start;
-5. startet die App über den LaunchAgent.
+1. builds the release version;
+2. creates `~/Applications/Pixiu Agent LED.app`;
+3. signs it ad hoc by default or with `SIGNING_IDENTITY`;
+4. installs a LaunchAgent that starts automatically at login; and
+5. starts the app through the LaunchAgent.
 
-Für eine Development-Signatur:
+To use a development signature:
 
 ```bash
 SIGNING_IDENTITY='Apple Development: Name (TEAMID)' ./scripts/install.sh
 ```
 
-## 3. Eingabeüberwachung erlauben
+## 3. Allow Input Monitoring
 
-Unter **Systemeinstellungen → Datenschutz & Sicherheit → Eingabeüberwachung**
-„Pixiu Agent LED“ einschalten. Danach die App beenden und erneut öffnen.
+Open **System Settings → Privacy & Security → Input Monitoring** and enable
+“Pixiu Agent LED.” Then quit and reopen the app.
 
-Ein typischer fehlender Zugriff erscheint als:
+A typical missing-permission error looks like this:
 
 ```text
 IOHIDManagerOpen failed: 0xE00002E2
 ```
 
-## 4. Status prüfen
+## 4. Check the status
 
 ```bash
 "$HOME/Applications/Pixiu Agent LED.app/Contents/MacOS/pixiu-led" status
@@ -55,35 +55,34 @@ IOHIDManagerOpen failed: 0xE00002E2
 "$HOME/Applications/Pixiu Agent LED.app/Contents/MacOS/pixiu-led" daemon-status
 ```
 
-Erwartetes Hotkey-Ergebnis:
+Expected hotkey result:
 
 ```text
 Registered keys: 1,2,3,4,5,6,7,8,9
 Conflicts: none
 ```
 
-## 5. Optionale Codex-Hooks
+## 5. Optional Codex hooks
 
-Die Desktop-Überwachung funktioniert ohne Hooks. Für schnellere Start-/Stop-
-Updates kann [examples/hooks.json](../examples/hooks.json) als Vorlage für
-`~/.codex/hooks.json` dienen. Vorhandene Hooks nicht blind überschreiben, sondern
-die Einträge zusammenführen.
+Desktop monitoring works without hooks. For faster start and stop updates, use
+[examples/hooks.json](../examples/hooks.json) as a template for
+`~/.codex/hooks.json`. Do not blindly overwrite existing hooks; merge the entries.
 
-## 6. Farben sicher testen
+## 6. Test colors safely
 
-Zuerst Dry-Run:
+Start with a dry run:
 
 ```bash
 swift run pixiu-led set 1 green 2 orange 3 red
 ```
 
-Erst danach wirklich senden:
+Only then send the colors to the keyboard:
 
 ```bash
 swift run pixiu-led set 1 green 2 orange 3 red --apply
 ```
 
-## 7. Protokolle und Zustand
+## 7. Logs and state
 
 ```text
 ~/Library/Application Support/PixiuAgentLED/state.json
@@ -93,32 +92,30 @@ swift run pixiu-led set 1 green 2 orange 3 red --apply
 ~/Library/Application Support/PixiuAgentLED/daemon-error.log
 ```
 
-## 8. Häufige Probleme
+## 8. Troubleshooting
 
-### App zeigt kein Fenster
+### The app does not show a window
 
-Das ist beabsichtigt: `LSBackgroundOnly` ist aktiv. Status und Diagnose erfolgen
-über die Tastatur oder die obigen Befehle.
+This is intentional: `LSBackgroundOnly` is enabled. Check status and diagnostics
+through the keyboard or the commands above.
 
-### Codex-Aufgabe wird erkannt, aber LED ändert sich nicht
+### A Codex task is detected, but the LED does not change
 
-`daemon-status` ausführen. `phase=applied` bestätigt die zuletzt erfolgreich
-gesendete Farbtabelle; `phase=error` zeigt den konkreten HID-Fehler. Danach
-`probe` ausführen, Eingabeüberwachung prüfen und sicherstellen, dass die Tastatur
-per Kabel verbunden ist.
+Run `daemon-status`. `phase=applied` confirms the last color table sent
+successfully; `phase=error` shows the specific HID error. Then run `probe`, check
+Input Monitoring, and make sure the keyboard is connected by cable.
 
-### LED funktioniert, aber der Hotkey springt nicht
+### The LED works, but the hotkey does not open the task
 
-`hotkeys` ausführen und danach den gewünschten Kurzbefehl einmal drücken. Die
-Zeile `Last trigger` unterscheidet drei Fälle: Kein Ereignis angekommen,
-Ereignis ohne zugewiesene Aufgabe oder Aufgabe erfolgreich geöffnet. Bei einem
-Konflikt den fremden System-/App-Kurzbefehl ändern oder die Modifier in
-`HotKeyNavigator.swift` anpassen. Prüfen, ob die installierte Codex-Version das
-Schema `codex://threads/<ID>` noch unterstützt.
+Run `hotkeys`, then press the desired shortcut once. The `Last trigger` line
+distinguishes three cases: no event received, an event without an assigned task,
+or a task opened successfully. If there is a conflict, change the other system or
+app shortcut, or adjust the modifiers in `HotKeyNavigator.swift`. Verify that the
+installed Codex version still supports `codex://threads/<ID>`.
 
-### Nach einem Neubau ist die Berechtigung weg
+### Permission disappears after rebuilding
 
-Bundle-ID `com.yijian.pixiu-agent-led`, Installationspfad und
-Signierungsidentität stabil halten. TCC bindet die Eingabeüberwachung an diese
-Anwendungsidentität, nicht nur an den sichtbaren Namen. Eine abweichende
-Bundle-ID oder ad-hoc-signierte Neubauten werden als andere Anwendung behandelt.
+Keep the bundle ID `com.yijian.pixiu-agent-led`, installation path, and signing
+identity stable. TCC associates Input Monitoring permission with this application
+identity, not only its visible name. A different bundle ID or a newly ad hoc-signed
+build is treated as a different application.

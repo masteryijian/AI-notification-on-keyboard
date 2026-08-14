@@ -1,5 +1,5 @@
 {
-  "description": "Optionaler schneller Lebenszyklus-Adapter für Pixiu Agent LED.",
+  "description": "Optional fast lifecycle adapter for Pixiu Agent LED.",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -25,4 +25,3 @@
     ]
   }
 }
-
