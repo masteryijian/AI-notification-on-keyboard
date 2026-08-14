@@ -20,7 +20,7 @@ ihren Fortschritt passiv wahrzunehmen.
 | zuverlässig erkannter Fehler | rot, dauerhaft |
 | kein zugewiesener Task | LED aus |
 
-- Jede erkannte Sitzung erhält automatisch die niedrigste freie Ziffer von `1` bis `9`.
+- Die Vergabe läuft zyklisch über `1` bis `9`; laufende Belegungen werden übersprungen.
 - Mehrere parallele Desktop-Aufgaben werden getrennt dargestellt.
 - Wieder aufgenommene und beim Programmstart bereits laufende Aufgaben werden erkannt.
 - `⌃⌥⌘1` bis `⌃⌥⌘9` öffnen die zugehörige Codex-Aufgabe.

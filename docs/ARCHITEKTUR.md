@@ -46,10 +46,11 @@ Operation idempotent.
 
 Der persistente Zustand ist eine kleine JSON-Datei mit Dateisperre. Die Vergabe:
 
-1. niedrigste freie Ziffer verwenden;
-2. wenn alle Ziffern schon einmal verwendet wurden, die älteste nicht laufende
-   Belegung zurückgewinnen;
-3. niemals eine aktuell laufende Aufgabe verdrängen.
+1. nach der zuletzt vergebenen Ziffer zyklisch weiterzählen;
+2. nach `9` wieder bei `1` beginnen;
+3. jede noch laufende Belegung überspringen;
+4. die erste freie, abgeschlossene oder fehlerhafte Belegung verwenden;
+5. niemals eine aktuell laufende Aufgabe verdrängen.
 
 ### HID-Ausgabe
 
@@ -84,4 +85,3 @@ source task id + working directory + running/done/error + timestamp
 Die Tastenvergabe, Persistenz, RGB-Ausgabe und Navigation können unverändert
 bleiben. Für Navigation braucht der Agent zusätzlich eine stabile URL oder einen
 anderen gezielten Öffnungsmechanismus.
-

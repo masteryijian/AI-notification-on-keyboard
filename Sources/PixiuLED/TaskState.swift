@@ -18,6 +18,27 @@ struct AgentTask: Codable {
 
 struct AgentTaskState: Codable {
     var tasks: [String: AgentTask] = [:]
+    var lastAssignedKey: Int = 0
+
+    init(tasks: [String: AgentTask] = [:], lastAssignedKey: Int = 0) {
+        self.tasks = tasks
+        self.lastAssignedKey = lastAssignedKey
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case tasks
+        case lastAssignedKey
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        tasks = try container.decodeIfPresent([String: AgentTask].self, forKey: .tasks) ?? [:]
+        // Legacy state files did not store a cursor. Starting after the highest
+        // occupied key preserves their existing 1,2,3... allocation naturally.
+        lastAssignedKey = try container.decodeIfPresent(Int.self, forKey: .lastAssignedKey)
+            ?? tasks.values.map(\.key).max()
+            ?? 0
+    }
 }
 
 final class DaemonInstanceLock {
@@ -122,16 +143,7 @@ func updateTask(
         }
 
         guard createIfMissing else { return }
-        let usedKeys = Set(state.tasks.values.map(\.key))
-        var assignedKey = (1...9).first { !usedKeys.contains($0) }
-        if assignedKey == nil,
-           let reclaim = state.tasks.values
-            .filter({ $0.status != .running })
-            .min(by: { $0.updatedAt < $1.updatedAt }) {
-            state.tasks.removeValue(forKey: reclaim.sessionID)
-            assignedKey = reclaim.key
-        }
-        guard let key = assignedKey else { return }
+        guard let key = nextAssignableKey(in: &state) else { return }
         state.tasks[sessionID] = AgentTask(
             sessionID: sessionID,
             key: key,
@@ -141,6 +153,22 @@ func updateTask(
             updatedAt: updatedAt
         )
     }
+}
+
+/// Advances around 1...9, skipping every key whose task is still running.
+/// A free key or the first completed/error key in cyclic order is reusable.
+func nextAssignableKey(in state: inout AgentTaskState) -> Int? {
+    let normalizedLastKey = (0...9).contains(state.lastAssignedKey) ? state.lastAssignedKey : 0
+    for offset in 0..<9 {
+        let candidate = ((normalizedLastKey + offset) % 9) + 1
+        if let occupied = state.tasks.first(where: { $0.value.key == candidate }) {
+            guard occupied.value.status != .running else { continue }
+            state.tasks.removeValue(forKey: occupied.key)
+        }
+        state.lastAssignedKey = candidate
+        return candidate
+    }
+    return nil
 }
 
 func updateTaskFromHook(_ data: Data) throws {
@@ -182,7 +210,10 @@ func printTaskStatus() throws {
 }
 
 func clearTaskState() throws {
-    try TaskStore.update { $0.tasks.removeAll() }
+    try TaskStore.update {
+        $0.tasks.removeAll()
+        $0.lastAssignedKey = 0
+    }
 }
 
 func taskColors(blinkOn: Bool) throws -> [Int: LEDColor] {
